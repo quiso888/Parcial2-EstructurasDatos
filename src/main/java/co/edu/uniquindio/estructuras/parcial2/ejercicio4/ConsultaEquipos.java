@@ -17,10 +17,16 @@ public class ConsultaEquipos {
      * Árbol vacío o inferior > superior -> 0.
      */
     public int contarEquiposEnRango(NodoABB raiz, int inferior, int superior) {
-        // TODO (Santiago): implementar contarEquiposEnRango de forma RECURSIVA.
-        // Caso base: raíz nula o inferior > superior → 0.
-        // Poda: si la clave es menor que el inferior, solo baje por la derecha;
-        //       si es mayor que el superior, solo baje por la izquierda.
-        throw new UnsupportedOperationException("Ejercicio 4a: contarEquiposEnRango (Santiago)");
+        if (raiz == null || inferior > superior) {
+            return 0;
+        }
+        if (raiz.getClave() < inferior) {
+            return contarEquiposEnRango(raiz.getDerecho(), inferior, superior);
+        }
+        if (raiz.getClave() > superior) {
+            return contarEquiposEnRango(raiz.getIzquierdo(), inferior, superior);
+        }
+        return 1 + contarEquiposEnRango(raiz.getIzquierdo(), inferior, superior)
+                 + contarEquiposEnRango(raiz.getDerecho(), inferior, superior);
     }
 }
