@@ -4,3 +4,8 @@ out/
 .idea/
 *.iml
 .vscode/
+.classpath
+.project
+.settings/
+nbproject/private/
+.DS_Store
