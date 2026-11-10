@@ -19,13 +19,33 @@ public class HistorialEditor {
      * Ejemplo: original A6 -> A5 -> A4 -> A3 -> A2 -> A1, inicio=2, fin=4 -> A5 -> A4 -> A3
      */
     public <T> Pila<T> obtenerSegmento(Pila<T> original, int inicio, int fin) {
-        // TODO (Nicolás): implementar obtenerSegmento.
-        // Pistas:
-        //  1. Validar el rango; si es inválido retornar una pila vacía.
-        //  2. Vaciar la original en una auxiliar contando posiciones; las que estén en
-        //     [inicio, fin] apilarlas también en una pila 'segmento'.
-        //  3. Restaurar la original desde la auxiliar.
-        //  4. Invertir 'segmento' en la pila resultado para que 'inicio' quede en la cima.
-        throw new UnsupportedOperationException("Ejercicio 2: obtenerSegmento (Nicolás)");
+        Pila<T> resultado = new Pila<>();
+        if (original == null || inicio < 1 || inicio > fin || fin > original.tamanio()) {
+            return resultado;
+        }
+
+        // 1. Vaciar la original en una auxiliar, guardando las del rango en 'segmento'.
+        Pila<T> auxiliar = new Pila<>();
+        Pila<T> segmento = new Pila<>();
+        int posicion = 1;
+        while (!original.estaVacia()) {
+            T accion = original.desapilar();
+            if (posicion >= inicio && posicion <= fin) {
+                segmento.apilar(accion); // queda 'fin' en la cima
+            }
+            auxiliar.apilar(accion);
+            posicion++;
+        }
+
+        // 2. Restaurar la original (la auxiliar está invertida).
+        while (!auxiliar.estaVacia()) {
+            original.apilar(auxiliar.desapilar());
+        }
+
+        // 3. Invertir el segmento para que 'inicio' quede en la cima.
+        while (!segmento.estaVacia()) {
+            resultado.apilar(segmento.desapilar());
+        }
+        return resultado;
     }
 }
