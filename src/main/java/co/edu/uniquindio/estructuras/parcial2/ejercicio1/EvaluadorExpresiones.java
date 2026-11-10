@@ -51,11 +51,34 @@ public class EvaluadorExpresiones {
      * Ejemplo: "(A + B) * C" -> cola [A, B, +, C, *].
      */
     public Cola<String> infijaAPostfija(String expresion) {
-        // TODO (Sergio): algoritmo de conversión infija → postfija con una Pila<String> de operadores.
-        // Pistas: use tokenizar(expresion). Operando → a la salida. "(" → apilar.
-        // ")" → desapilar a la salida hasta "(". Operador → desapilar mientras la cima tenga
-        // prioridad mayor o igual (ver prioridad()), luego apilarlo. Al final vaciar la pila.
-        throw new UnsupportedOperationException("Ejercicio 1: infijaAPostfija (Sergio)");
+        Cola<String> entrada = tokenizar(expresion);
+        Cola<String> salida = new Cola<>();
+        Pila<String> operadores = new Pila<>();
+        while (!entrada.estaVacia()) {
+            String t = entrada.desencolar();
+            if (t.equals("(")) {
+                operadores.apilar(t);
+            } else if (t.equals(")")) {
+                while (!operadores.estaVacia() && !operadores.cima().equals("(")) {
+                    salida.encolar(operadores.desapilar());
+                }
+                if (!operadores.estaVacia()) operadores.desapilar(); // quita "("
+            } else if (esOperador(t)) {
+                // ^ es asociativo a la derecha; los demás a la izquierda
+                while (!operadores.estaVacia() && esOperador(operadores.cima())
+                        && (prioridad(operadores.cima()) > prioridad(t)
+                            || (prioridad(operadores.cima()) == prioridad(t) && !t.equals("^")))) {
+                    salida.encolar(operadores.desapilar());
+                }
+                operadores.apilar(t);
+            } else {
+                salida.encolar(t); // operando
+            }
+        }
+        while (!operadores.estaVacia()) {
+            salida.encolar(operadores.desapilar());
+        }
+        return salida;
     }
 
     /**
@@ -86,11 +109,26 @@ public class EvaluadorExpresiones {
      * Retorna el resultado final (el único elemento que queda en la pila).
      */
     public double evaluarPostfija(Cola<String> postfija, Cola<PasoEvaluacion> tabla) {
-        // TODO (Sergio): evaluar la postfija con una Pila<Double>.
-        // Recorra la cola sin perderla (desencolar y volver a encolar, tamanio() veces).
-        // Por cada token agregue una fila: tabla.encolar(new PasoEvaluacion(token, operacion, pilaComoTexto(pila)))
-        // Recuerde: al desapilar sale primero el operando DERECHO (b) y luego el izquierdo (a).
-        throw new UnsupportedOperationException("Ejercicio 1: evaluarPostfija (Sergio)");
+        Pila<Double> pila = new Pila<>();
+        int n = postfija.tamanio();
+        for (int k = 0; k < n; k++) {
+            String t = postfija.desencolar();
+            postfija.encolar(t);
+            String operacion;
+            if (esOperador(t)) {
+                double b = pila.desapilar();
+                double a = pila.desapilar();
+                double r = operar(a, b, t);
+                pila.apilar(r);
+                operacion = formatear(a) + " " + t + " " + formatear(b) + " = " + formatear(r);
+            } else {
+                double valor = Double.parseDouble(t);
+                pila.apilar(valor);
+                operacion = "Apilar " + formatear(valor);
+            }
+            if (tabla != null) tabla.encolar(new PasoEvaluacion(t, operacion, pilaComoTexto(pila)));
+        }
+        return pila.desapilar();
     }
 
     /** Aplica el operador. Ya implementado. */
