@@ -38,18 +38,38 @@ public class SeleccionPaquetes {
      */
     public Cola<Paquete> seleccionarPaquetes(Cola<Paquete> pendientes, int capacidad) {
         bitacora = new Cola<>();
-        // TODO (Nicolás): implementar seleccionarPaquetes SIN for/while/do-while.
-        // Pistas:
-        //  - Guarde la capacidad en 'capacidadRestante'. Si capacidad <= 0 → retornar cola vacía.
-        //  - Haga dos recorridos recursivos: uno para URGENTE y otro para NORMAL.
-        //  - Cada recorrido procesa exactamente pendientes.tamanio() paquetes: desencola uno;
-        //    si es del tipo buscado y cabe → a seleccionados; si no → vuelve a encolarse en pendientes.
-        //    Así los pendientes conservan su orden original.
-        //  - Registre cada paquete evaluado en 'bitacora'.
-        throw new UnsupportedOperationException("Ejercicio 3: seleccionarPaquetes (Nicolás)");
+        Cola<Paquete> seleccionados = new Cola<>();
+        capacidadRestante = Math.max(capacidad, 0);
+        if (pendientes == null || capacidad <= 0) {
+            capacidadRestante = capacidad;
+            return seleccionados;
+        }
+        // Recorrido 1: urgentes. Recorrido 2: normales.
+        // Cada recorrido "rota" la cola exactamente tamanio() veces: los que no se seleccionan
+        // vuelven al final, así que los pendientes conservan su orden original.
+        recorrer(pendientes, seleccionados, TipoEntrega.URGENTE, pendientes.tamanio());
+        recorrer(pendientes, seleccionados, TipoEntrega.NORMAL, pendientes.tamanio());
+        return seleccionados;
     }
 
-    // TODO (Nicolás): escriba aquí el método recursivo auxiliar, por ejemplo:
-    // private void recorrer(Cola<Paquete> pendientes, Cola<Paquete> seleccionados, TipoEntrega tipo, int restantes)
-    //   caso base: restantes == 0
+    /** Procesa 'restantes' paquetes del frente de la cola, de forma recursiva. */
+    private void recorrer(Cola<Paquete> pendientes, Cola<Paquete> seleccionados, TipoEntrega tipo, int restantes) {
+        if (restantes == 0) {
+            return; // caso base
+        }
+        Paquete p = pendientes.desencolar();
+        if (p.getTipo() == tipo) {
+            if (p.getPeso() <= capacidadRestante) {
+                capacidadRestante -= p.getPeso();
+                seleccionados.encolar(p);
+                bitacora.encolar(p + " -> SELECCIONADO (quedan " + capacidadRestante + " kg)");
+            } else {
+                pendientes.encolar(p);
+                bitacora.encolar(p + " -> PENDIENTE (no cabe, quedan " + capacidadRestante + " kg)");
+            }
+        } else {
+            pendientes.encolar(p); // no es del tipo de este recorrido: vuelve al final sin evaluarse
+        }
+        recorrer(pendientes, seleccionados, tipo, restantes - 1);
+    }
 }
