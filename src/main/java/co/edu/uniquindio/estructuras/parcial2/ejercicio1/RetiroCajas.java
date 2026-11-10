@@ -20,14 +20,46 @@ public class RetiroCajas {
      * Solo se permiten operaciones de la Pila propia y pilas propias auxiliares.
      */
     public boolean retirarCaja(Pila<Caja> pila, String codigo) {
-        // TODO (Sergio): implementar retirarCaja.
-        // Pistas:
-        //  1. Si la pila está vacía → false.
-        //  2. Desapilar a una pila auxiliar hasta encontrar el código (o vaciar la pila).
-        //  3. Devolver las cajas de la auxiliar a la pila. Si no se encontró → false (queda igual).
-        //  4. Recorrer la pila contando posiciones desde 1 y repartir en dos pilas: impares y pares.
-        //  5. Valor PAR: impares arriba. Valor IMPAR: pares arriba.
-        //     Apilar primero el grupo de abajo y luego el de arriba (desapilando las auxiliares).
-        throw new UnsupportedOperationException("Ejercicio 1: retirarCaja (Sergio)");
+        if (pila == null || pila.estaVacia()) {
+            return false;
+        }
+
+        // 1. Buscar la caja pasando las de encima a una pila auxiliar.
+        Pila<Caja> auxiliar = new Pila<>();
+        Caja retirada = null;
+        while (!pila.estaVacia()) {
+            Caja actual = pila.desapilar();
+            if (actual.getCodigo().equals(codigo)) {
+                retirada = actual;
+                break;
+            }
+            auxiliar.apilar(actual);
+        }
+
+        // 2. Devolver las cajas de encima (si no se encontró, la pila queda exactamente igual).
+        while (!auxiliar.estaVacia()) {
+            pila.apilar(auxiliar.desapilar());
+        }
+        if (retirada == null) {
+            return false;
+        }
+
+        // 3. Separar por posición (1 = cima). Las pilas auxiliares quedan invertidas.
+        Pila<Caja> impares = new Pila<>();
+        Pila<Caja> pares = new Pila<>();
+        int posicion = 1;
+        while (!pila.estaVacia()) {
+            if (posicion % 2 != 0) impares.apilar(pila.desapilar());
+            else pares.apilar(pila.desapilar());
+            posicion++;
+        }
+
+        // 4. Reconstruir: primero el grupo que va al fondo, luego el que va arriba.
+        //    Al desapilar las auxiliares salen del más profundo al más alto, así se conserva el orden.
+        Pila<Caja> arriba = retirada.getValor() % 2 == 0 ? impares : pares;
+        Pila<Caja> abajo = retirada.getValor() % 2 == 0 ? pares : impares;
+        while (!abajo.estaVacia()) pila.apilar(abajo.desapilar());
+        while (!arriba.estaVacia()) pila.apilar(arriba.desapilar());
+        return true;
     }
 }
